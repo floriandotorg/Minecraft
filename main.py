@@ -150,7 +150,7 @@ class Model(object):
         self._initialize()
 
     def _initialize(self):
-        """ Initialize the world by placing all the blocks.
+        """ Initialize the world by placing ALL the blocks.
 
         """
         n = 80  # 1/2 width and height of world
@@ -239,7 +239,7 @@ class Model(object):
 
         """
         if position in self.world:
-            self.remove_block(position, immediate)
+            self.remove_block(position, immediate, False)
         self.world[position] = texture
         self.sectors.setdefault(sectorize(position), []).append(position)
         if immediate:
@@ -247,7 +247,7 @@ class Model(object):
                 self.show_block(position)
             self.check_neighbors(position)
 
-    def remove_block(self, position, immediate=True):
+    def remove_block(self, position, immediate=True, sand=True):
         """ Remove the block at the given `position`.
 
         Parameters
@@ -258,8 +258,17 @@ class Model(object):
             Whether or not to immediately remove block from canvas.
 
         """
+
+        if sand:
+            for block_pos, block_tex in self.world.items():
+                if block_pos[0] == position[0] and block_pos[2] == position[2] and block_pos[1] == position[1] + 1 and block_tex == SAND:
+                    self.remove_block(block_pos)
+                    return
+
         del self.world[position]
+
         self.sectors[sectorize(position)].remove(position)
+
         if immediate:
             if position in self.shown:
                 self.hide_block(position)
